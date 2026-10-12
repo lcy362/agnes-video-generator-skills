@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local scratch: never commit generated media or per-run output
+*.mp4
+*.mp3
+*.srt
+!skills/**/assets/*.srt
+out/
+output/
+tmp/
+.DS_Store
+
+# Credentials must never be committed (see AGENTS.md §5)
+.env
+.env.*
+!.env.example
