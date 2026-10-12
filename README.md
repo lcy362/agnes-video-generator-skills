@@ -45,6 +45,23 @@ They coexist:
 maintainer personally (see upstream `docs/dev/release_process.md`). Encoding it as a skill
 would only invite misuse.
 
+## How it relates to agnes-video-generator
+
+The project describes agent-driven operation in three levels, and this repository **is level 2**:
+
+| Level | What it is | Where it lives |
+|-------|-----------|----------------|
+| 1 | Point your agent at the project — it reads `AGENTS.md` | [`docs/public/agent-operations.md`](https://github.com/lcy362/agnes-video-generator/blob/master/docs/public/agent-operations.md) |
+| **2** | **Install this skill set — the agent stops having to learn the project first** | **this repository** |
+| 3 | Distribute the skills to every agent you use | [flint](https://github.com/lcy362/flint) |
+
+Two consequences worth knowing:
+
+- The **authoritative description** of levels 1–3 is the project document linked above. When it and this repository disagree, that document wins.
+- The **`description` field of each `SKILL.md`** is what an agent matches against to pick a skill up. Keep those trigger phrases in sync with how the project actually talks about its features — that is the part of this repository that has to stay accurate.
+
+When the upstream project changes behaviour that a skill documents, update the skill in the same round; the per-file source anchors in each `references/*.md` say which upstream document it was verified against.
+
 ## Layout
 
 ```
