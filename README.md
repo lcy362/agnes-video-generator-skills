@@ -85,11 +85,18 @@ agnes-video-generator-skills/
 
 ## Installation
 
+Clone this repository first. flint reads **local** sources only and never clones anything for you:
+
+```bash
+git clone https://github.com/lcy362/agnes-video-generator-skills.git
+```
+
 **Option 1 — flint as an external source (recommended)**
 
-Register this repository in flint as an external source and pick the `nested` layout
+In flint, add the directory you just cloned as an external source and pick the `nested` layout
 (`auto` also works: a `skills/*/SKILL.md` subtree is detected as nested). Then distribute
-individual skills to the agent directories you want.
+individual skills to the agent directories you want. flint can refresh from that git checkout
+later, but only when you ask it to — it never fetches on its own.
 
 **Option 2 — merge into the local skills library**
 
