@@ -13,6 +13,12 @@ Change the service's code and get the PR through CI. Repository:
 performed by the maintainer — see upstream `docs/dev/release_process.md` for that flow, and do not
 attempt it from this skill.
 
+**This is the only skill that clones the project.** `agnes-video-usage` installs the service without a
+clone (npm into `$AGNES_HOME/runtime`); if the user just wants videos, send them there. Clone here when
+the work is on the code, and if a change touches installation or startup, update
+`agnes-video-usage/SKILL.md` and `references/bootstrap-contract.md` in the same PR — the exit-code table
+and the script must never drift apart.
+
 ## 1. The two rules that fail most PRs
 
 1. **Commit messages must be in English** — Conventional Commits prefix plus an English body.

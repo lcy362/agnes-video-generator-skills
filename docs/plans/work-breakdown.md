@@ -123,7 +123,7 @@ AGNES_HOME=$(mktemp -d) npx free-short-video --detach --json           # B3 之�
 | A5 `agnes_task.py` 快照 | ✅ |
 | A6 `report_issue.py` | ✅ |
 | A7 `pipeline-selection.md` / `progress.md` | ✅ |
-| A8 `contrib` 微调 | ⬜ 待做（clone 路线表述已无冲突，可延后） |
+| A8 `contrib` 微调 | ✅ |
 | A9 真实安装冒烟 | ⬜ 待跑（需联网下载数百 MB） |
 | A10 README 安装节 | ✅ |
 | A11 `AGENTS.md` bootstrap 约定 | ✅ |
