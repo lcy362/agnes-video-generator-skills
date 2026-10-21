@@ -1,7 +1,12 @@
 # Deploying and configuring the service
 
 > Source anchor: upstream `docs/public/getting-started.md`, `AGENTS.md` §0, `docs/public/faq.md`.
-> Last verified: 2026-10-12 against upstream v7.5 docs.
+> Last verified: 2026-10-21 against upstream v7.2.0.
+
+> **Agent path (preferred):** `python3 scripts/bootstrap.py install --yes --json` covers §0 end to end —
+> installation under `$AGNES_HOME`, its own venv, start, workspace wiring, and the key check. The manual
+> steps below are for teaching a human, debugging the bootstrap, or the deliberate route A (changing code).
+> Directory layout, state machine and exit codes: `bootstrap-contract.md`.
 
 ## 0. From zero: onboarding
 
@@ -16,32 +21,51 @@ python3 --version ; docker --version ; node --version ; ffmpeg -version | head -
 
 | Environment | Route |
 |-------------|-------|
-| Python 3.10+ present, user may work on the code | A — manual (`./start.sh`) |
-| Docker present, user does not want to manage Python or ffmpeg | B — Docker |
-| Node 18+ and Python 3.10+, user wants a one-command install | C — npm (`npx free-short-video`) |
-| No Python 3.10+ and no Docker | Stop and help the user install one of them first — do not improvise route A |
+| Node 18+ and Python 3.10+ (the common case) | **C — npm, default** (no clone; `bootstrap.py` or `npx free-short-video`) |
+| Docker present, no Python, user does not want to manage ffmpeg | B — Docker |
+| User wants to change the code | A — manual (`git clone` + `./start.sh`) |
+| No Python 3.10+, no Docker, no Node | Stop and help the user install one of them first — do not improvise |
 
-**Step 2 — decide where the project and its data live.** Ask the user where they want the repository
-cloned and where generated videos should land. The workspace is not necessarily the clone directory;
-it is configurable (§4) and is what the user will browse for finished videos. Confirm the path.
+**Step 2 — decide where the data lives.** With routes B and C nothing is cloned, so the only path to
+agree on is the workspace: `$AGNES_HOME/workspace` by default, or the folder the user wants to browse
+(`AGNES_OUTPUT_DIR` gets a copy of each deliverable, §4).
 
-**Step 3 — clone and install.**
+**Step 3 — install.** Default route C (no clone, no system ffmpeg):
+
+```bash
+python3 scripts/bootstrap.py install --yes --json   # agent path: own venv, start, workspace
+```
+
+Manual equivalent (what the script does under the hood — note the venv lives in `$AGNES_HOME`, not in
+the package directory, so a version bump never re-downloads Python dependencies):
+
+```bash
+export AGNES_HOME="$HOME/.agnes-video"
+npm install --prefix "$AGNES_HOME/runtime" free-short-video@latest
+python3 -m venv "$AGNES_HOME/venv"
+"$AGNES_HOME/venv/bin/pip" install -r "$AGNES_HOME/runtime/node_modules/free-short-video/requirements.txt"
+AGNES_CONFIG_DIR="$AGNES_HOME/config" PORT=8765 \
+  "$AGNES_HOME/venv/bin/python" "$AGNES_HOME/runtime/node_modules/free-short-video/server.py"
+```
+
+Route A (only when the user wants to work on the code):
 
 ```bash
 git clone https://github.com/lcy362/agnes-video-generator.git
-cd agnes-video-generator && ./start.sh          # route A
+cd agnes-video-generator && ./start.sh
 ```
-
-`start.sh` creates the venv, installs dependencies and serves `http://localhost:8765`. For routes B
-and C see §1 — neither needs a system ffmpeg.
 
 **Step 4 — configure the API key.** Ask the user for it; free keys come from
 <https://platform.agnes-ai.com>.
 
 ```bash
-curl -X POST http://localhost:8765/api/config \
-  -H "Content-Type: application/json" -d '{"api_key": "..."}'
+curl -X POST http://localhost:8765/api/config -F 'api_key=...'   # endpoint expects form data
+curl -X POST http://localhost:8765/api/config/keys/detect        # bind the key to its domain
+curl -s http://localhost:8765/api/models > /dev/null            # cheap proof the key works
 ```
+
+The agent path is `python3 scripts/bootstrap.py config-key` with the key on stdin (no argv, no echo);
+the preferred path is still the user pasting it into the local web UI themselves.
 
 Never invent a key, never print it back in full, and never write it into a file that could be
 committed. If a `401` follows, read §3 before changing anything — the key is probably bound to a
@@ -64,18 +88,14 @@ verification result.
 
 | Route | When | Command |
 |-------|------|---------|
-| A — manual | You have Python and want to work on the code | `./start.sh` (creates the venv, installs deps, starts on 8765) |
-| B — Docker | No Python / ffmpeg on the host | `docker run -d -p 8765:8765 -e AGNES_API_KEY=<key> -v ~/agnes-data/working:/app/.working_dir -v ~/agnes-data/config:/app/.agnes_config lcy362/free-short-video:latest` |
-| C — npm | One command, no clone | `AGNES_API_KEY=<key> npx free-short-video` (options: `--port`, `--host`, `--no-open`) |
-| D — agent-assisted | Hand the whole thing to an agent | Tell it to read upstream `AGENTS.md`, install deps, set the key, start the server |
+| **C — npm (default)** | Node 18+ and Python 3.10+, the common case | `python3 scripts/bootstrap.py install --yes` (own venv, stable paths) or `npx free-short-video` |
+| B — Docker | No Python / no ffmpeg on the host | `docker run -d -p 8765:8765 -v ~/.agnes-video/config:/app/.agnes_config -v ~/.agnes-video/workspace:/app/.working_dir lcy362/free-short-video:latest` |
+| A — manual | The user wants to change the code | `git clone` + `./start.sh` (creates `.venv`, installs deps, starts on 8765) |
 
-Manual equivalent of `start.sh`:
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python server.py
-```
+> `npx free-short-video` is fine for a human one-off, but it keeps its venv inside the npx cache
+> directory and re-runs `pip install` on every start (`bin/cli.js`), so an npm cache clean or a version
+> bump re-downloads the Python dependencies. `bootstrap.py` exists precisely to avoid that: it owns
+> `$AGNES_HOME/venv` and skips pip when `requirements.txt` is unchanged.
 
 Requirements: Python 3.10+. ffmpeg is only needed for route A; Docker and npm bundle it
 (`imageio-ffmpeg`), and a system ffmpeg on `PATH` takes precedence over the bundled one.
@@ -84,8 +104,7 @@ Requirements: Python 3.10+. ffmpeg is only needed for route A; Docker and npm bu
 
 ```bash
 export AGNES_API_KEY="your-api-key"                      # env, read at startup
-curl -X POST http://localhost:8765/api/config \
-  -H "Content-Type: application/json" -d '{"api_key": "your-api-key"}'   # or via API / Web UI
+curl -X POST http://localhost:8765/api/config -F 'api_key=your-api-key'   # form data, not JSON
 ```
 
 Several keys: name them `AGNES_API_KEY`, `AGNES_API_KEY_2`, `AGNES_API_KEY_3` … numbering must be

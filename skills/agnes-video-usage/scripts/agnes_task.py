@@ -20,6 +20,9 @@ Usage:
 
 Add --json to any command for machine-readable output.
 
+When AGNES_HOME is set, ``status`` also writes a snapshot to
+``$AGNES_HOME/tasks/<task_id>.json`` so a later session can resume without re-asking.
+
 Exit codes: 0 success, 1 error or a failed task, 2 the task is in a non-terminal state
 after --timeout.
 
@@ -211,10 +214,32 @@ def cmd_create(args: argparse.Namespace) -> int:
     return 0
 
 
+def write_snapshot(state: dict) -> None:
+    """Persist the latest task state under $AGNES_HOME/tasks/<id>.json.
+
+    A later session (or a different agent) can resume polling from the file instead of
+    asking the user anything. Best effort: snapshot failures never affect the command.
+    """
+    task_id = str(state.get("task_id") or "")
+    home = os.environ.get("AGNES_HOME", "").strip()
+    if not task_id or not home:
+        return
+    path = os.path.join(os.path.expanduser(home), "tasks", f"{task_id}.json")
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(state, fh, ensure_ascii=False)
+        os.replace(tmp, path)
+    except OSError:
+        pass
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     path = f"/api/tasks/{args.task_id}"
     if not args.wait:
         state = get_json(args, path)
+        write_snapshot(state)
         emit(args, state, lambda p: print("\n".join(status_lines(p))))
         return 1 if state.get("status") == "failed" else 0
 
@@ -223,6 +248,7 @@ def cmd_status(args: argparse.Namespace) -> int:
     state = {}
     while True:
         state = get_json(args, path)
+        write_snapshot(state)
         signature = (
             state.get("status"),
             state.get("current_step"),

@@ -85,6 +85,11 @@ agnes-video-generator-skills/
 
 ## Installation
 
+> These skills also install the **service** on demand — the agent does not need the
+> agnes-video-generator repository cloned first. `agnes-video-usage` runs
+> `scripts/bootstrap.py install`, which puts everything under `~/.agnes-video` (override with
+> `AGNES_HOME`), keeps its own venv, and starts the service on `localhost:8765`.
+
 Clone this repository first. flint reads **local** sources only and never clones anything for you:
 
 ```bash
