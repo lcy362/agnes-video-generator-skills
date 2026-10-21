@@ -26,6 +26,7 @@ Usage:
   bootstrap.py start      [--json] [--port N]
   bootstrap.py stop       [--json]
   bootstrap.py status     [--json]
+  bootstrap.py verify     [--json]            # read-only readiness proof, no upstream quota
   bootstrap.py config-key [--json]            # reads the key from stdin
   bootstrap.py uninstall  [--yes]
 
@@ -438,7 +439,10 @@ def start_service(paths: Paths, base: str, state: dict) -> tuple[int, list[str]]
     """Start (or reuse) the service. Returns (exit code, hints)."""
     hints: list[str] = []
     if service_info(base).get("reachable"):
-        return 0, ["service already running — reused, nothing installed"]
+        ensure_workspace(paths, base)
+        if not service_info(base).get("has_key"):
+            return 10, ["service already running — reused; the only missing piece is an API key"]
+        return 0, ["service already running — reused, nothing installed or restarted"]
 
     if not state:
         return 20, ["nothing installed yet: run `bootstrap.py install` first"]
@@ -784,6 +788,43 @@ def cmd_status(paths: Paths, base: str, as_json: bool) -> int:
     return emit(payload, as_json, code)
 
 
+def cmd_verify(paths: Paths, base: str, as_json: bool) -> int:
+    """Read-only readiness proof: the service answers, without touching upstream quota."""
+    checks: list[dict] = []
+
+    def check(name: str, path: str, timeout: float = 10.0) -> bool:
+        status, _ = http("GET", path, base, timeout=timeout)
+        checks.append({"name": name, "path": path, "status": status, "ok": status == 200})
+        return status == 200
+
+    if not service_info(base).get("reachable"):
+        return emit({
+            "ok": False, "code": 1, "home": str(paths.home), "base": base,
+            "checks": checks,
+            "hints": ["service is not answering — run `bootstrap.py start` first"],
+        }, as_json, 1)
+
+    check("config", "/api/config")
+    check("voices", "/api/voices", timeout=30)
+    check("tasks", "/api/tasks")
+    check("index", "/")
+    info = service_info(base)
+    failed = [c["name"] for c in checks if not c["ok"]]
+    needs = []
+    if not info.get("has_key"):
+        needs.append("api_key")
+    code = 1 if failed else (10 if needs else 0)
+    hints = [f"failed: {', '.join(failed)}"] if failed else []
+    if needs:
+        hints.append("service and voices are fine; the only missing piece is an API key")
+    return emit({
+        "ok": code == 0, "code": code, "home": str(paths.home), "base": base,
+        "service_version": info.get("version", ""), "skill_version": skill_version(),
+        "workspace": str(paths.workspace), "outputs": str(paths.outputs),
+        "checks": checks, "needs": needs, "hints": hints,
+    }, as_json, code)
+
+
 def cmd_config_key(paths: Paths, base: str, as_json: bool) -> int:
     key = sys.stdin.readline().strip()
     if not key:
@@ -877,6 +918,8 @@ def main(argv: list[str]) -> int:
     sub.add_parser("start", parents=[common], help="start if needed (idempotent)")
     sub.add_parser("stop", parents=[common], help="stop the service")
     sub.add_parser("status", parents=[common], help="one-line health plus exit code")
+    sub.add_parser("verify", parents=[common],
+                   help="read-only readiness proof (config, voices, tasks, index)")
     sub.add_parser("config-key", parents=[common],
                    help="read an API key from stdin, bind the domain, verify")
     p_uninstall = sub.add_parser("uninstall", parents=[common], help="delete $AGNES_HOME")
@@ -907,6 +950,8 @@ def main(argv: list[str]) -> int:
         return cmd_stop(paths, args.json)
     if args.command == "status":
         return cmd_status(paths, base, args.json)
+    if args.command == "verify":
+        return cmd_verify(paths, base, args.json)
     if args.command == "config-key":
         return cmd_config_key(paths, base, args.json)
     if args.command == "uninstall":

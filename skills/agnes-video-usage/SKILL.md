@@ -20,7 +20,12 @@ script owns installation; you own the conversation.
 python3 scripts/bootstrap.py probe  --json    # read-only: what exists, what is missing
 python3 scripts/bootstrap.py install --yes --json   # once; then it also starts
 python3 scripts/bootstrap.py start  --json    # idempotent; reuse if already running
+python3 scripts/bootstrap.py verify --json    # readiness proof, costs no upstream quota
 ```
+
+`verify` checks `/api/config`, `/api/voices`, `/api/tasks` and the index page. It is the evidence you
+show the user that the machine is ready before a key exists — do not replace it with "the process
+started".
 
 Branch on the exit code, never on the text:
 

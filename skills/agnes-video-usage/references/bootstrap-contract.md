@@ -94,6 +94,10 @@ probe ─┬─ service.reachable ───────────────�
   lines of `logs/server.log` — report them, do not retry blindly.
 - After readiness, point the service at `$AGNES_HOME/workspace` via `POST /api/workspaces` +
   `POST /api/workspaces/active`, but only when the active workspace differs.
+- Readiness proof (`bootstrap.py verify`) is four read-only checks: `/api/config`, `/api/voices`,
+  `/api/tasks`, `/` — all reachable without a key and without consuming upstream quota. It returns
+  `0` when everything passes and a key is configured, `10` when everything passes but the key is
+  missing, `1` when a check failed (the failing names are in `checks[]`).
 
 ## 7. Key handling
 

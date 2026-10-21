@@ -100,7 +100,27 @@ Adding a skill?
 the maintainer. The contrib skill may contain one sentence pointing at upstream
 `docs/dev/release_process.md`, but must not spell out the steps.
 
-## 8. After editing
+## 8. Bootstrap conventions
+
+`skills/agnes-video-usage/scripts/bootstrap.py` is the single source of truth for installing and
+starting the service. Rules for anything that touches it:
+
+1. **Write only under `$AGNES_HOME`** (default `~/.agnes-video`). Never install, clone or create files
+   in the user's current directory, and never write into a skill directory (it may be a read-only symlink).
+2. **Exit codes are the interface.** `SKILL.md` and `references/bootstrap-contract.md` must list the same
+   codes as the script; adding or changing one means updating all three in the same commit.
+3. **npm is a distribution vehicle, not a launcher.** Do not call the package's `bin/cli.js` to run the
+   service: it keeps its venv inside the npx cache and reinstalls Python dependencies on every start.
+   Own the venv and skip pip via the requirements fingerprint.
+4. **A repeat run must be a no-op.** Reuse a reachable service; reuse an install that satisfies
+   `requires_service`; never silently upgrade.
+5. **Credentials**: read a key only from stdin or the user's own web UI. Never from argv, never echoed,
+   never written outside `config/`, never into a report or a task payload.
+6. **Evidence over claims**: readiness is `verify` output, not "the process started".
+
+---
+
+## 9. After editing
 
 - If the skill is already distributed to an agent directory, re-sync or re-distribute it through
   flint — never edit the deployed copy in place.
