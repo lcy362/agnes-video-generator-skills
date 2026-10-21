@@ -472,6 +472,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("-o", "--output", help="output file (default final_<task_id>.mp4)")
     p.set_defaults(func=cmd_download)
 
+    # Global switches must also work after the subcommand (`create ... --json`),
+    # which is how SKILL.md and agents invoke this script. SUPPRESS keeps the
+    # absent case from clobbering the top-level value.
+    for subparser in sub.choices.values():
+        subparser.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
+                               help="print raw JSON")
+        subparser.add_argument("--base", default=argparse.SUPPRESS,
+                               help="service base URL (default $AGNES_VIDEO_BASE)")
+
     return parser
 
 

@@ -2,6 +2,7 @@
 name: agnes-video-contrib
 description: Contribute code to the agnes-video-generator project and open a PR the way its CI and maintainer expect - branch and commit conventions (English commit messages are mandatory), local pre-flight checks (ruff, pytest with coverage gate, i18n completeness, mock regression), the rule that any frontend source change must be rebuilt into static/ and committed, and i18n text that must be added to both zh.json and en.json. Also covers running the 14-scenario large-version regression. Use when the user says "change agnes-video-generator", "fix a bug in it", "add a feature to it", "open a PR", "its CI failed", "static/ is out of date", "add a translation", or "run the regression". Not for releasing.
 agent_created: true
+version: 0.1.0
 ---
 
 # agnes-video-generator — contributing
@@ -16,7 +17,7 @@ attempt it from this skill.
 **This is the only skill that clones the project.** `agnes-video-usage` installs the service without a
 clone (npm into `$AGNES_HOME/runtime`); if the user just wants videos, send them there. Clone here when
 the work is on the code, and if a change touches installation or startup, update
-`agnes-video-usage/SKILL.md` and `references/bootstrap-contract.md` in the same PR — the exit-code table
+`agnes-video-usage/SKILL.md` and `agnes-video-usage/references/bootstrap-contract.md` in the same PR — the exit-code table
 and the script must never drift apart.
 
 ## 1. The two rules that fail most PRs
@@ -54,6 +55,9 @@ steps — **present the root cause and the proposed change, wait for the user to
 One issue per PR, and verify with the exact path the dossier named.
 
 ## 3. Check → fix map
+
+All commands below run **in the project checkout** (`agnes-video-generator/`), not in this skill
+directory.
 
 | CI job / check | Command | Fix |
 |----------------|---------|-----|

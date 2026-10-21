@@ -177,11 +177,13 @@ def service_info(base: str) -> dict:
     except json.JSONDecodeError:
         return {"reachable": True}
     masked = str(data.get("api_key") or "")
+    flag = data.get("has_key")
     active = data.get("active_workspace") or {}
     return {
         "reachable": True,
         "version": data.get("app_version", ""),
-        "has_key": bool(masked),
+        # `has_key` is authoritative from v7.2.1; older builds only expose the mask.
+        "has_key": flag if isinstance(flag, bool) else bool(masked),
         "key_source": data.get("source", ""),
         "domain": data.get("agnes_domain", ""),
         "workspace": active.get("path", "") if isinstance(active, dict) else "",

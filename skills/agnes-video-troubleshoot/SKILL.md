@@ -2,6 +2,7 @@
 name: agnes-video-troubleshoot
 description: Diagnose and collect evidence for agnes-video-generator failures - task failed or stuck, upstream HTTP 503 queue-full, 401 invalid token, timeouts, wrong output resolution, portrait video upside-down / sideways, subtitles out of sync, or subtitles degrading to heuristic timing after a resume. Covers the two-track retry model, the diagnostics endpoint and error_logs, direct upstream re-probing with curl plus ffprobe, and resume behaviour. Use when the user says "the task keeps failing", "it says 503 / queue is full", "invalid token", "generation timed out", "the video is sideways", "resolution is wrong", "subtitles do not match the audio", or "resume broke the subtitles".
 agent_created: true
+version: 0.1.0
 ---
 
 # agnes-video-generator — troubleshooting

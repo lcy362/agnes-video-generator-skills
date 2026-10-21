@@ -1,7 +1,7 @@
 # Deploying and configuring the service
 
-> Source anchor: upstream `docs/public/getting-started.md`, `AGENTS.md` §0, `docs/public/faq.md`.
-> Last verified: 2026-10-21 against upstream v7.2.0.
+> Source anchor: upstream `docs/public/getting-started.md`, `AGENTS.md` §0, `docs/public/faq.md`,
+> `bin/cli.js`. Last verified: 2026-10-21 against upstream v7.2.1.
 
 > **Agent path (preferred):** `python3 scripts/bootstrap.py install --yes --json` covers §0 end to end —
 > installation under `$AGNES_HOME`, its own venv, start, workspace wiring, and the key check. The manual
@@ -88,14 +88,18 @@ verification result.
 
 | Route | When | Command |
 |-------|------|---------|
-| **C — npm (default)** | Node 18+ and Python 3.10+, the common case | `python3 scripts/bootstrap.py install --yes` (own venv, stable paths) or `npx free-short-video` |
-| B — Docker | No Python / no ffmpeg on the host | `docker run -d -p 8765:8765 -v ~/.agnes-video/config:/app/.agnes_config -v ~/.agnes-video/workspace:/app/.working_dir lcy362/free-short-video:latest` |
+| **C — npm (default)** | Node 18+ and Python 3.10+, the common case | `python3 scripts/bootstrap.py install --yes` (own venv, stable paths) or `npx free-short-video@7.2.1 --detach --json` |
+| B — Docker | No Python / no ffmpeg on the host | `docker run -d -p 8765:8765 -v ~/.agnes-video/config:/app/.agnes_config -v ~/.agnes-video/workspace:/app/.working_dir lcy362/free-short-video:7.2.1` |
 | A — manual | The user wants to change the code | `git clone` + `./start.sh` (creates `.venv`, installs deps, starts on 8765) |
 
-> `npx free-short-video` is fine for a human one-off, but it keeps its venv inside the npx cache
-> directory and re-runs `pip install` on every start (`bin/cli.js`), so an npm cache clean or a version
-> bump re-downloads the Python dependencies. `bootstrap.py` exists precisely to avoid that: it owns
-> `$AGNES_HOME/venv` and skips pip when `requirements.txt` is unchanged.
+> Since upstream **v7.2.1** the npm launcher has the same properties: data root under `~/.agnes-video`
+> (`AGNES_HOME` / `--home`), dependencies installed once (requirements fingerprint), and
+> `--detach` / `--json` / `--print-paths` for scripts. `bootstrap.py` still owns its own venv and
+> `server.py` spawn so that every supported install — npm at any version, Docker, clone — behaves
+> identically, and so upgrades keep working even if the package layout changes again.
+>
+> Upgrading an older npm install: the launcher copies a legacy in-package `.agnes_config` into the new
+> data root on first run, so the configured key survives; previously generated videos are not moved.
 
 Requirements: Python 3.10+. ffmpeg is only needed for route A; Docker and npm bundle it
 (`imageio-ffmpeg`), and a system ffmpeg on `PATH` takes precedence over the bundled one.

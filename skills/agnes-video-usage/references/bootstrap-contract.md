@@ -1,22 +1,30 @@
 # Bootstrap contract
 
-> Source anchor: upstream `bin/cli.js`, `core/config.py` (`AGNES_CONFIG_DIR`), `server.py` (HOST/PORT),
-> `web/routes/workspace_routes.py`. Verified 2026-10-21 against upstream v7.2.0.
+> Source anchor: upstream `bin/cli.js`, `core/config.py` (`AGNES_CONFIG_DIR`, `AGNES_WORKING_DIR`),
+> `server.py` (HOST/PORT), `web/routes/workspace_routes.py`, `GET /api/config` (`has_key`).
+> Verified 2026-10-21 against upstream v7.2.1.
 > This file is the authority for `scripts/bootstrap.py`. When the two disagree, fix the script.
 
 ## 1. Why this script exists
 
-The npm package is used as a **distribution vehicle only**. `bin/cli.js` is *not* used to run the
-service, for two measured reasons:
+The npm package is used as a **distribution vehicle only**: `bootstrap.py` installs it with
+`npm --prefix` into `$AGNES_HOME/runtime`, builds its own venv in `$AGNES_HOME/venv`, skips pip when
+the `requirements.txt` fingerprint is unchanged, and spawns `server.py` directly with
+`AGNES_CONFIG_DIR` / `AGNES_WORKING_DIR` / `AGNES_LOG_FILE` pointing inside `$AGNES_HOME`.
 
-| Upstream behaviour | Evidence | Consequence |
-|--------------------|----------|-------------|
-| venv is created inside the package directory | `bin/cli.js` (`path.join(PKG_ROOT, '.venv')`) | under npx that directory is `~/.npm/_npx/<hash>`: an npm cache clean or a version bump re-downloads every Python dependency |
-| `pip install -r requirements.txt` runs on every start | same file; the log says "first run only" but the call sits outside the `if venv missing` branch | every launch pays a network round-trip and resolution |
+Upstream history matters here, because it explains why the script does not simply delegate to
+`bin/cli.js`:
 
-So `bootstrap.py` installs the package into `$AGNES_HOME/runtime`, creates its own venv in
-`$AGNES_HOME/venv`, skips pip when the `requirements.txt` fingerprint is unchanged, and spawns
-`server.py` directly with `AGNES_CONFIG_DIR` pointing inside `$AGNES_HOME`.
+| Behavior | Before v7.2.1 | Now (≥ v7.2.1) |
+|----------|---------------|----------------|
+| Where the venv lives | inside the package directory — under npx that is `~/.npm/_npx/<hash>`, so a cache clean or version bump re-downloaded every Python dependency | `$AGNES_HOME/venv` |
+| When pip runs | every start (the log said "first run only", the call sat outside the `if venv missing` branch) | only when `requirements.txt` changed (sha256 fingerprint) |
+| Startup result for scripts | interactive only | `--detach` / `--json` / `--print-paths` |
+
+The script keeps its own venv and spawn anyway, for three reasons: the skill supports services installed
+by Docker or a clone with the same code path; it must keep working if the package layout changes again;
+and `bootstrap.py` needs a deterministic `install.json` to answer "is this machine ready" without
+starting anything.
 
 ## 2. Directory layout
 

@@ -133,9 +133,11 @@ AGNES_HOME=$(mktemp -d) npx free-short-video --detach --json           # B3 之�
 | B4 `--print-paths` | ✅ |
 | B5 `GET /api/config` 增 `has_key` | ✅ |
 | B6 文档同步（getting-started / agent-operations） | ✅ |
-| B7 回归 / B8 发版 | ⬜ 回归可跑，发版需维护者执行 |
+| B7 回归 / B8 发版 | ✅ 已发 v7.2.1（CI 全绿）；全量 mock 回归未跑 |
 
-> 新增上游能力：`AGNES_WORKING_DIR`（默认工作区可重定向），由 `bin/cli.js` 在 `AGNES_HOME` 模式下注入。
+> 新增上游能力：`AGNES_WORKING_DIR`（默认工作区可重定向）、`has_key`（`GET /api/config`），由
+> `bin/cli.js` 在 `AGNES_HOME` 模式下注入配置/工作区/日志路径。
+> 因依赖 `has_key` 与 `AGNES_WORKING_DIR`，skill 的 `requires_service` 已收紧为 `>=7.2.1`。
 
 ---
 

@@ -3,7 +3,7 @@ name: agnes-video-usage
 description: Take the agnes-video-generator service from nothing to finished videos without cloning the project first - the skill installs it on demand into ~/.agnes-video, starts it on localhost:8765, walks the user through a free API key, picks the right pipeline (simple / creative / manuscript / anchor / poetry / image) for the request, reports progress step by step, and drives Manual Mode checkpoints by rewriting storyboards, narration, subtitles, scene videos or reference images before resuming. Use when the user says "install / set up agnes video", "generate a video with agnes", "make a creative / manuscript / poetry / digital-human video", "run it in manual mode", "improve the storyboard / narration / subtitles", or "check on my video task".
 agent_created: true
 version: 0.2.0
-requires_service: ">=7.2.0"
+requires_service: ">=7.2.1"
 ---
 
 # agnes-video-generator — usage
