@@ -468,6 +468,7 @@ def start_service(paths: Paths, base: str, state: dict) -> tuple[int, list[str]]
             ]
         env = dict(os.environ)
         env["AGNES_CONFIG_DIR"] = str(paths.config)
+        env["AGNES_WORKING_DIR"] = str(paths.workspace)
         env["AGNES_LOG_FILE"] = str(paths.logs / "agnes.log")
         env["HOST"] = os.environ.get("AGNES_HOST", "127.0.0.1")
         env["PORT"] = str(paths.port)

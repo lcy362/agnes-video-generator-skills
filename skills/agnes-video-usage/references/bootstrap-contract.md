@@ -92,6 +92,9 @@ probe ─┬─ service.reachable ───────────────�
   `HOST=127.0.0.1` (override `AGNES_HOST`), `PORT=<port>`, plus the bundled ffmpeg directory on `PATH`.
 - Readiness = `GET /api/config` answering 200 within 90 s. On timeout the hints carry the last 25
   lines of `logs/server.log` — report them, do not retry blindly.
+- The child process also gets `AGNES_WORKING_DIR=$AGNES_HOME/workspace`, so a fresh config already
+  defaults to the right path. The workspace API calls below remain the fallback for a service that was
+  already running (started by the user, or an older build that predates the variable).
 - After readiness, point the service at `$AGNES_HOME/workspace` via `POST /api/workspaces` +
   `POST /api/workspaces/active`, but only when the active workspace differs.
 - Readiness proof (`bootstrap.py verify`) is four read-only checks: `/api/config`, `/api/voices`,

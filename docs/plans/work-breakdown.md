@@ -112,6 +112,33 @@ AGNES_HOME=$(mktemp -d) npx free-short-video --detach --json           # B3 之�
 
 ---
 
+## 实施状态（2026-10-21）
+
+| 项 | 状态 |
+|----|------|
+| A1 `bootstrap.py`（含 `verify`） | ✅ 已实现并推送 |
+| A2 `SKILL.md` 重写 | ✅ |
+| A3 `deploy.md` 默认路线改 npm | ✅ |
+| A4 `bootstrap-contract.md` | ✅ |
+| A5 `agnes_task.py` 快照 | ✅ |
+| A6 `report_issue.py` | ✅ |
+| A7 `pipeline-selection.md` / `progress.md` | ✅ |
+| A8 `contrib` 微调 | ⬜ 待做（clone 路线表述已无冲突，可延后） |
+| A9 真实安装冒烟 | ⬜ 待跑（需联网下载数百 MB） |
+| A10 README 安装节 | ✅ |
+| A11 `AGENTS.md` bootstrap 约定 | ✅ |
+| B1 `bin/cli.js` 支持 `AGNES_HOME` | ✅ |
+| B2 requirements 指纹跳过 pip | ✅ |
+| B3 `--detach` / `--json` | ✅ |
+| B4 `--print-paths` | ✅ |
+| B5 `GET /api/config` 增 `has_key` | ✅ |
+| B6 文档同步（getting-started / agent-operations） | ✅ |
+| B7 回归 / B8 发版 | ⬜ 回归可跑，发版需维护者执行 |
+
+> 新增上游能力：`AGNES_WORKING_DIR`（默认工作区可重定向），由 `bin/cli.js` 在 `AGNES_HOME` 模式下注入。
+
+---
+
 ## 明确不做
 
 - 不改视频流水线、不改前端 UI、不加遥测。
