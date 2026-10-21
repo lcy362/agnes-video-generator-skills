@@ -1,66 +1,70 @@
 # agnes-video-generator-skills
 
 Companion skills for [agnes-video-generator](https://github.com/lcy362/agnes-video-generator).
-No service code here — this repository turns "how to use it, how to debug it, how to change it"
-into operational skills an AI agent can execute directly.
 
-## Why this exists
+Install them once and your coding agent can drive the whole thing: it installs the service on demand,
+generates videos, explains failures, and changes the project's code — no clone of the upstream
+repository, no commands typed by you.
 
-The upstream project documents itself in `AGENTS.md` and `docs/dev/*.md`, but those are long
-documents written **for an agent working inside that repository**. Everyday work happens
-somewhere else:
+## Quick start
 
-- **Using** the service (start it, create a task, watch progress, verify artifacts, recover)
-- **Debugging** a failed run from another directory, in a different agent session
-- **Contributing** a fix from a fork
+The skills are plain directories plus small scripts: no service code, and no credentials ever pass
+through them.
 
-In all three cases the agent cannot (and should not) read dozens of upstream docs.
+```bash
+git clone https://github.com/lcy362/agnes-video-generator-skills.git
+npx flint-skills-hub     # Sources → add the cloned directory (flint reads its skills/ subdirectory)
+```
 
-So this repository does one thing: **it indexes and operationalizes, it does not duplicate.**
-Each skill is a decision tree plus pointers plus runnable scripts. When detail is needed,
-the pointer leads back to the authoritative upstream document.
+[**flint**](https://github.com/lcy362/flint) is a local-first, open-source skills manager. It deploys
+the skills into any agent directory (Claude Code, Cursor, Codex, TRAE and more) by symlink or copy —
+no cloud, no account, no telemetry. It reads **local** sources only and never clones anything for
+you, so you register the directory you just cloned. Flatten into the local library instead? Copy each
+`skills/<name>/` into `~/local-skills/skills/<name>/` — note this repository is **nested**
+(`skills/<name>/`) while a flint-managed library is **flat**.
 
-## The three skills
+**No flint?** Copy them in by hand. The trade-off is that you repeat it for every project and every
+new agent:
 
-| Skill | For | Covers | Trigger phrases |
-|-------|-----|--------|-----------------|
-| `agnes-video-usage` | **Users** | Deploy and start, pick among the six task types, create tasks and poll progress, **Manual Mode checkpoints + have a local agent rewrite artifacts**, artifact write-back and cascade re-run | "generate a video with agnes", "run a creative long video", "edit the storyboard at the checkpoint" |
-| `agnes-video-troubleshoot` | **Users / maintainers** | Task failure attribution, queue-full and 401, timeouts, wrong resolution, upside-down portrait output, broken subtitle timeline, evidence collection | "the task keeps failing", "503 / 401", "the video is sideways", "subtitles are out of sync" |
-| `agnes-video-contrib` | **Contributors** | Branch and English-commit rules, local pre-flight, frontend changes must rebuild and commit `static/`, i18n must update zh+en, large-version regression | "open a PR for agnes-video-generator", "change its frontend", "run the regression" |
+```bash
+cp -R agnes-video-generator-skills/skills/* <project>/.agents/skills/
+```
 
-### Not overlapping the existing `agnes-*` skills
+### The skills install the service themselves
 
-`agnes-video-gen`, `agnes-image-gen` and `agnes-ai-generation` talk **directly to the upstream API**
-(`apihub.agnes-ai.com`) and bypass the service entirely. This repository drives **the service itself**.
-They coexist:
+The upstream repository does **not** need to be cloned. `agnes-video-usage` runs
+`scripts/bootstrap.py install`, which puts the service under `~/.agnes-video` (override with
+`AGNES_HOME`), keeps its own venv there, skips `pip` when `requirements.txt` is unchanged, starts the
+service on `localhost:8765` and verifies it through the real endpoints. Config, workspace and
+finished videos live in that same data root; nothing is written into your project.
 
-- Just want a quick video without running a server → `agnes-video-gen`
-- Need the six pipelines (creative / manuscript / anchor / poetry), subtitles and voices,
-  or Manual Mode artifact editing → `agnes-video-usage`
-- The service will not start or a task will not finish → `agnes-video-troubleshoot`
+## What you can ask for
 
-### Explicitly out of scope
+> "Make a creative long video about the Voyager probes, with narration and subtitles."
 
-**Releasing is not here.** Release involves a human review gate and is performed by the
-maintainer personally (see upstream `docs/dev/release_process.md`). Encoding it as a skill
-would only invite misuse.
+> "My task `4de1bcd26fda` failed — find out why and tell me if it is worth fixing."
 
-## How it relates to agnes-video-generator
+> "The portrait video came out sideways. Diagnose it and fix the configuration."
 
-The project describes agent-driven operation in three levels, and this repository **is level 2**:
+> "Take my finished task, improve the storyboard prompts, and regenerate only the affected scenes."
 
-| Level | What it is | Where it lives |
-|-------|-----------|----------------|
-| 1 | Point your agent at the project — it reads `AGENTS.md` | [`docs/public/agent-operations.md`](https://github.com/lcy362/agnes-video-generator/blob/master/docs/public/agent-operations.md) |
-| **2** | **Install this skill set — the agent stops having to learn the project first** | **this repository** |
-| 3 | Distribute the skills to every agent you use | [flint](https://github.com/lcy362/flint) |
+| Skill | Use it when you want to |
+|-------|-------------------------|
+| `agnes-video-usage` | Install and start the service, pick among the six task types, create tasks and poll progress, **Manual Mode checkpoints + have the agent rewrite artifacts** before resuming |
+| `agnes-video-troubleshoot` | Attribute a failure: queue-full and `401`, timeouts, wrong resolution, upside-down portrait output, broken subtitle timeline, evidence collection |
+| `agnes-video-contrib` | Change the project's code: branch and English-commit rules, pre-flight, frontend rebuild into `static/`, i18n, large-version regression |
 
-Two consequences worth knowing:
+Each `SKILL.md` carries the trigger phrases an agent matches against. Keep them in sync with how the
+project actually talks about its features — that is the part of this repository that has to stay
+accurate.
 
-- The **authoritative description** of levels 1–3 is the project document linked above. When it and this repository disagree, that document wins.
-- The **`description` field of each `SKILL.md`** is what an agent matches against to pick a skill up. Keep those trigger phrases in sync with how the project actually talks about its features — that is the part of this repository that has to stay accurate.
+**Direct-API skills are a different thing.** `agnes-video-gen`, `agnes-image-gen` and
+`agnes-ai-generation` talk straight to `apihub.agnes-ai.com` and bypass the service. Use those for a
+quick one-off video; use this repository when you need the six pipelines, narration, subtitles or
+Manual Mode artifact editing.
 
-When the upstream project changes behaviour that a skill documents, update the skill in the same round; the per-file source anchors in each `references/*.md` say which upstream document it was verified against.
+**Out of scope: releasing.** A release involves a human review gate and stays with the maintainer
+(upstream `docs/dev/release_process.md`). Encoding it as a skill would only invite misuse.
 
 ## Layout
 
@@ -71,44 +75,17 @@ agnes-video-generator-skills/
 └─ skills/
    ├─ agnes-video-usage/
    │   ├─ SKILL.md
-   │   ├─ references/   # deploy / task-types / manual-mode / artifacts
-   │   └─ scripts/      # agnes_task.py, verify_deploy.sh
+   │   ├─ references/   # bootstrap-contract / deploy / task-types / manual-mode / artifacts
+   │   └─ scripts/      # bootstrap.py, agnes_task.py, verify_deploy.sh
    ├─ agnes-video-troubleshoot/
    │   ├─ SKILL.md
    │   ├─ references/   # upstream-errors / resolution-orientation / subtitle-timeline / task-forensics
-   │   └─ scripts/      # diagnose_task.py, check_media.py
+   │   └─ scripts/      # diagnose_task.py, check_media.py, report_issue.py
    └─ agnes-video-contrib/
        ├─ SKILL.md
        ├─ references/   # workflow / dev-standards / testing / frontend-i18n / regression
        └─ scripts/      # preflight.sh
 ```
-
-## Installation
-
-> These skills also install the **service** on demand — the agent does not need the
-> agnes-video-generator repository cloned first. `agnes-video-usage` runs
-> `scripts/bootstrap.py install`, which puts everything under `~/.agnes-video` (override with
-> `AGNES_HOME`), keeps its own venv, and starts the service on `localhost:8765`.
-
-Clone this repository first. flint reads **local** sources only and never clones anything for you:
-
-```bash
-git clone https://github.com/lcy362/agnes-video-generator-skills.git
-```
-
-**Option 1 — flint as an external source (recommended)**
-
-In flint, add the directory you just cloned as an external source and pick the `nested` layout
-(`auto` also works: a `skills/*/SKILL.md` subtree is detected as nested). Then distribute
-individual skills to the agent directories you want. flint can refresh from that git checkout
-later, but only when you ask it to — it never fetches on its own.
-
-**Option 2 — merge into the local skills library**
-
-Copy each `skills/<name>/` directory into `~/local-skills/skills/<name>/` and let flint
-distribute it. Note the layout difference: this repository is **nested** (`skills/<name>/`),
-while a flint-managed `~/local-skills` is **flat**. Copy the skill directory itself — do not
-copy the extra `skills/` level into it.
 
 ## Requirements
 
@@ -126,6 +103,7 @@ remain authoritative:
 
 | Topic | Upstream authoritative document |
 |-------|--------------------------------|
+| Agent operation, bootstrap contract | `docs/public/agent-operations.md` |
 | Artifact logic, subtitle cue timeline | `docs/dev/pipeline_products.md` |
 | Measured upstream API behavior, resolution and orientation | `docs/dev/agnes_video_upstream_behavior.md` |
 | Artifact standard and external-tool collaboration | `docs/dev/artifact_standard.md` |
