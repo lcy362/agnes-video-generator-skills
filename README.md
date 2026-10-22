@@ -1,13 +1,11 @@
 # agnes-video
 
-**One skill that turns an idea into a finished video.** Install it, describe the result you want, and
-your coding agent installs the service, runs the task, reports progress, delivers the file — and, when
-something breaks, works out why and (with your agreement) fixes it and opens a PR.
+**One skill that turns an idea into a finished video.** Describe the result you want and your coding
+agent runs the task end to end: it installs the local service, generates the video, reports progress,
+delivers the file, diagnoses failures, and — with your agreement — fixes a genuine defect and opens a PR.
 
-This is not an add-on to another repository. You do not need
-[agnes-video-generator](https://github.com/lcy362/agnes-video-generator) cloned, or even installed
-beforehand: the skill installs it on demand into `~/.agnes-video`, keeps it there, and reuses it from
-then on.
+The service installs on demand under `~/.agnes-video` (override with `AGNES_HOME`) and is reused
+afterwards, so only the first run pays the setup cost.
 
 ## Quick start
 

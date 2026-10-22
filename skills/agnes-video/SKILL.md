@@ -1,6 +1,6 @@
 ---
 name: agnes-video
-description: Turn an idea into a finished video without cloning the project first - this one skill installs the agnes-video-generator service on demand into ~/.agnes-video, starts it on localhost:8765, walks the user through a free API key, picks the right pipeline (simple / creative / manuscript / anchor / poetry / image), reports progress step by step, delivers the file, diagnoses failures (503 queue-full, 401 domain mismatch, timeouts, wrong resolution, sideways portrait, broken subtitle timeline), and - once the user agrees - fixes a genuine service defect and opens a PR. Use when the user says "install / set up agnes video", "generate a video with agnes", "make a creative / manuscript / poetry / digital-human video", "run manual mode", "improve the storyboard / narration / subtitles", "check on my video task", "the task keeps failing", "the video is sideways", "subtitles are out of sync", "fix this / open a PR for agnes-video-generator".
+description: Create AI videos with Agnes Video (agnes-video-generator) — text-to-video, image-to-video, keyframe animation, digital-human presenter, poem recitation, manuscript-to-video and still images, with AI narration and subtitles. Use when the user asks to make, generate or regenerate a video, or to check an Agnes video task — set up the local service, pick a pipeline, submit a task, follow progress, download the finished file, edit storyboard / narration / subtitles at a Manual Mode checkpoint — or diagnose a failure (queue-full 503, 401 domain mismatch, timeout, wrong resolution, sideways portrait, out-of-sync subtitles), or fix a bug in agnes-video-generator and open a PR.
 agent_created: true
 version: 1.0.0
 requires_service: ">=7.2.1"
@@ -8,12 +8,11 @@ requires_service: ">=7.2.1"
 
 # agnes-video
 
-One skill, one loop: **install → create → watch → deliver → diagnose → fix**. Every step below runs
+One skill, one loop: **install → create → deliver → diagnose → fix**. Every step below runs
 against `$AGNES_VIDEO_BASE` (default `http://127.0.0.1:8765`).
 
-**Do not clone the project and do not read its repository to get started.** The bootstrap script owns
-installation; you own the conversation. A clone happens only in §7, when the user has agreed to change
-the service's code.
+`scripts/bootstrap.py` owns installation; you own the conversation. §7 is the only part that reads or
+changes the service's source code — everything else is task control over HTTP.
 
 ## 0. The loop
 

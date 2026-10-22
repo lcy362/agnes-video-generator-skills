@@ -7,10 +7,9 @@
 
 ## 1. What this is
 
-`agnes-video-generator-skills` ships **one standalone skill** that turns an idea into a finished
-video: it installs [agnes-video-generator](https://github.com/lcy362/agnes-video-generator) on
-demand, runs the task, diagnoses failures, and — once the user agrees — fixes a genuine service
-defect and opens a PR. The skill is usable on its own; the project is its dependency, not its owner.
+`agnes-video-generator-skills` ships a single skill that turns an idea into a finished video: it
+installs [agnes-video-generator](https://github.com/lcy362/agnes-video-generator) on demand, runs the
+task, diagnoses failures, and — once the user agrees — fixes a genuine service defect and opens a PR.
 This repository contains **no service code** and does **not** copy upstream document bodies.
 
 ```
