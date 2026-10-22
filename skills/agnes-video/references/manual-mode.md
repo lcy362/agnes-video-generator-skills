@@ -187,7 +187,7 @@ Approval is not the end of your job:
 - The user rejects your edit → restore the original from git-less backup you made before editing, or
   re-`regen` the checkpoint.
 - The re-run produced the same problem → stop editing artifacts; this is a service or upstream defect,
-  which is the `agnes-video-troubleshoot` skill's job.
+  which is the diagnosis phase's job.
 - Use the checkpoint page's "Report a problem" entry (task id, checkpoint, handling method,
   before/after diff, `checkpoint.json`, error log) to produce a report, then add expected result,
   actual result and reproduction steps.

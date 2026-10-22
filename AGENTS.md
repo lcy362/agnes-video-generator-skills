@@ -7,35 +7,39 @@
 
 ## 1. What this is
 
-`agnes-video-generator-skills` is the companion skill set for
-[agnes-video-generator](https://github.com/lcy362/agnes-video-generator).
-It turns three kinds of work — **using**, **debugging**, **contributing** — into skills an agent
-can execute directly. This repository contains **no service code** and does **not** copy
-upstream document bodies.
+`agnes-video-generator-skills` ships **one standalone skill** that turns an idea into a finished
+video: it installs [agnes-video-generator](https://github.com/lcy362/agnes-video-generator) on
+demand, runs the task, diagnoses failures, and — once the user agrees — fixes a genuine service
+defect and opens a PR. The skill is usable on its own; the project is its dependency, not its owner.
+This repository contains **no service code** and does **not** copy upstream document bodies.
 
 ```
-skills/<skill-name>/
-├─ SKILL.md          # the only entry point: decision tree + minimal commands + pointers (required)
-├─ references/       # detail (optional)
-└─ scripts/          # executable scripts (optional)
+skills/agnes-video/
+├─ SKILL.md          # the only entry point: install → create → deliver → diagnose → fix
+├─ references/       # detail, one file per topic
+└─ scripts/          # bootstrap, task control, diagnosis, pre-flight
 ```
 
 ## 2. Layout and naming
 
-1. One skill per directory, `kebab-case`, and **the directory name must equal `name` in `SKILL.md`**.
+1. One skill, one directory: `skills/agnes-video/`, and **the directory name must equal `name` in
+   `SKILL.md`**.
 2. Skills live under `skills/` (nested layout). The repository root must **not** contain a
    `SKILL.md` — otherwise the whole repository is detected as a *single-skill repo* and collapses
    into one skill.
-3. `SKILL.md` contains only: **when to use → decision tree → minimal runnable commands →
+3. `SKILL.md` contains only: **when to use → the closed loop → minimal runnable commands →
    which reference/script to open next**. No long explanations; those belong in `references/`,
    which in turn point at upstream documents.
 4. Documentation prose is English. Identifiers, filenames and commands are English too.
+5. **Do not split the loop back into sibling skills.** Install, use, diagnose and fix share one
+   bootstrap, one task model and one exit-code contract; separate skills drifted apart in practice.
+   Add a reference file instead.
 
 ## 3. Frontmatter contract
 
 ```yaml
 ---
-name: agnes-video-usage          # must equal the directory name
+name: agnes-video               # must equal the directory name
 description: ...                 # must state the scenario AND trigger phrases
 agent_created: true
 ---
@@ -74,12 +78,12 @@ which an agent retrieves the skill. Include the phrasing users actually type
 ## 6. Adding or changing a skill
 
 ```
-Adding a skill?
- ├─ Decide which skill it belongs to: usage / troubleshoot / contrib
- │   └─ Fits none of them → raise it for discussion first
- │      (avoid creating a fourth skill with fuzzy boundaries)
- ├─ Create the directory: skills/<kebab-name>/
- ├─ Write SKILL.md: frontmatter (name + description with trigger phrases) + decision tree + pointers
+Adding or changing something?
+ ├─ Decide where it sits in the loop: install / use / diagnose / fix
+ │   └─ Fits nowhere → raise it for discussion before writing
+ │      (do NOT add a second skill; extend this one)
+ ├─ Keep the directory: skills/agnes-video/
+ ├─ Update SKILL.md only where the loop changes (frontmatter trigger phrases included)
  ├─ Scripts → scripts/ ; detail → references/ (with source anchor)
  └─ Self-check:
      ├─ frontmatter: name == directory name; description non-empty and contains trigger phrases
@@ -90,19 +94,19 @@ Adding a skill?
 
 ## 7. Boundaries (do not cross)
 
-| Skill | Only does | Explicitly does not |
-|-------|-----------|---------------------|
-| `agnes-video-usage` | Produce videos via the service; edit artifacts in Manual Mode | Modify service code |
-| `agnes-video-troubleshoot` | Locate and collect evidence; state conclusions and next steps | Modify the upstream repository; present a flaky observation as a certainty |
-| `agnes-video-contrib` | Change code → self-check → open a PR | **Releasing**, maintainer-only operations, CI secret setup |
+| Stage of the loop | Only does | Explicitly does not |
+|-------------------|-----------|---------------------|
+| Install / use | Bootstrap the service, pick a pipeline, drive the task, edit artifacts in Manual Mode | Hand-edit the service's code |
+| Diagnose | Locate and collect evidence; state conclusions and next steps | Present a flaky observation as certainty; change code before the user agrees |
+| Fix | Small, reproducible defects: change → pre-flight → PR | **Releasing**, maintainer-only operations, CI secret setup; speculative refactors |
 
 **Releasing stays out of this repository.** It involves a human review gate and is performed by
-the maintainer. The contrib skill may contain one sentence pointing at upstream
+the maintainer. `SKILL.md` may contain one sentence pointing at upstream
 `docs/dev/release_process.md`, but must not spell out the steps.
 
 ## 8. Bootstrap conventions
 
-`skills/agnes-video-usage/scripts/bootstrap.py` is the single source of truth for installing and
+`skills/agnes-video/scripts/bootstrap.py` is the single source of truth for installing and
 starting the service. Rules for anything that touches it:
 
 1. **Write only under `$AGNES_HOME`** (default `~/.agnes-video`). Never install, clone or create files

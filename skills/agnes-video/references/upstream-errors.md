@@ -94,7 +94,7 @@ delete that key is the user's decision on the config page. If the user does noth
 error keeps surfacing.
 
 Root cause is nearly always a key bound to the wrong site domain — see
-`agnes-video-usage/references/deploy.md` §3.
+`references/deploy.md` §3.
 
 ## 7. Polling design (do not "fix" it)
 

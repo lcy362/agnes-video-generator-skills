@@ -14,7 +14,7 @@ key and roughly an hour.
 2. **One round of tasks only.** Create exactly the scenarios in the matrix, one task each. Do not
    create extras.
 3. **Do not change code during a run.** Record problems in the report; fix only after the user
-   confirms (the same gate the `agnes-video-troubleshoot` skill applies).
+   confirms (the same gate the diagnosis phase applies).
 4. **Record the concrete reason for every failure** — HTTP status, error message, timeout duration.
 5. **Resume unexplained failures.** If the cause is unclear (timeout, transient API fault), finish
    with `--resume` instead of skipping. Do not mark something "passed" by omission.

@@ -87,7 +87,7 @@ release-note wording — **releases are the maintainer's job** (`docs/dev/releas
 
 ## 6. The hotfix path (from a troubleshooting dossier)
 
-When the `agnes-video-troubleshoot` skill hands over a defect:
+When the diagnosis phase hands over a defect:
 
 1. **Confirm with the user before touching code.** Diagnosis and fixing are separate steps; the
    dossier is a proposal, not a mandate.
