@@ -48,9 +48,9 @@ DESCRIPTION_ZH = (
     "不需要显卡：服务跑在本地，生成走 Agnes AI 的免费模型，唯一要求是一个免费 API Key。"
 )
 
-DISPLAY_NAME = "Agnes Video — Free AI Video Generation"
-DISPLAY_NAME_EN = "Agnes Video — Free AI Video Generation"
-DISPLAY_NAME_ZH = "Agnes Video —— 免费 AI 视频生成"
+DISPLAY_NAME = "Agnes 免费 AI 视频生成"
+DISPLAY_NAME_EN = "Agnes Video — Free AI Video"
+DISPLAY_NAME_ZH = "Agnes 免费 AI 视频生成"
 
 SKILLHUB_FRONTMATTER = f"""---
 name: agnes-video
