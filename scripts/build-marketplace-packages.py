@@ -31,6 +31,10 @@ SKILL_DIR = ROOT / "skills" / "agnes-video"
 DIST = ROOT / "dist" / "marketplace"
 VERSION = "1.0.0"
 AUTHOR = "lcy362 (SandGrid)"
+# Storefronts reject a name that is already taken globally. `agnes-video` is
+# owned by two other publishers on SkillHub / WorkBuddy, so the packaged skill
+# uses a distinct name while the canonical source directory stays `agnes-video`.
+SKILL_NAME = "agnes-video-free"
 
 # Keep every value on one line and never use ": " (colon + space): YAML reads
 # that as a nested mapping and both storefronts reject the package.
@@ -53,7 +57,7 @@ DISPLAY_NAME_EN = "Agnes Video — Free AI Video"
 DISPLAY_NAME_ZH = "Agnes 免费 AI 视频生成"
 
 SKILLHUB_FRONTMATTER = f"""---
-name: agnes-video
+name: {SKILL_NAME}
 displayName: {DISPLAY_NAME}
 description: {DESCRIPTION_EN}
 version: {VERSION}
@@ -65,7 +69,7 @@ license: MIT
 """
 
 WORKBUDDY_FRONTMATTER = f"""---
-name: agnes-video
+name: {SKILL_NAME}
 display_name: {DISPLAY_NAME}
 display_name_en: {DISPLAY_NAME_EN}
 description: {DESCRIPTION_EN}
@@ -79,7 +83,7 @@ license: MIT
 """
 
 PLUGIN_JSON = {
-    "name": "agnes-video",
+    "name": SKILL_NAME,
     "display_name": DISPLAY_NAME,
     "display_name_en": DISPLAY_NAME_EN,
     "display_name_zh": DISPLAY_NAME_ZH,
@@ -107,9 +111,9 @@ def split_skill_md() -> str:
 
 
 def stage(target: pathlib.Path, frontmatter: str) -> pathlib.Path:
-    """Copy the skill into a temp staging root as <root>/agnes-video/."""
+    """Copy the skill into a temp staging root as <root>/<SKILL_NAME>/."""
     root = pathlib.Path(tempfile.mkdtemp(prefix="agnes-pkg-"))
-    dest = root / "agnes-video"
+    dest = root / SKILL_NAME
     shutil.copytree(
         SKILL_DIR,
         dest,
@@ -132,15 +136,15 @@ def zip_dir(root: pathlib.Path, out: pathlib.Path) -> None:
 def build(site: str) -> pathlib.Path:
     if site == "skillhub":
         root = stage(DIST, SKILLHUB_FRONTMATTER)
-        out = DIST / f"agnes-video-skillhub-{VERSION}.zip"
+        out = DIST / f"{SKILL_NAME}-skillhub-{VERSION}.zip"
     elif site == "workbuddy":
         root = stage(DIST, WORKBUDDY_FRONTMATTER)
-        plugin_dir = root / "agnes-video" / ".codebuddy-plugin"
+        plugin_dir = root / SKILL_NAME / ".codebuddy-plugin"
         plugin_dir.mkdir(exist_ok=True)
         (plugin_dir / "plugin.json").write_text(
             json.dumps(PLUGIN_JSON, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
-        out = DIST / f"agnes-video-workbuddy-{VERSION}.zip"
+        out = DIST / f"{SKILL_NAME}-workbuddy-{VERSION}.zip"
     else:
         raise SystemExit(f"unknown site: {site}")
 
