@@ -86,6 +86,11 @@ Adding or changing something?
  ├─ Scripts → scripts/ ; detail → references/ (with source anchor)
  └─ Self-check:
      ├─ frontmatter: name == directory name; description non-empty and contains trigger phrases
+    ├─ frontmatter YAML parses: a single-line `description` must not contain ": "
+    │  (YAML reads it as a nested mapping and the skills CLI skips the whole skill;
+    │  use " — " or ". " instead)
+    ├─ the skill actually installs: `npx skills add <owner>/<repo> --skill <name>` must not
+    │  print SKILLS_SKILL_SKIPPED
      ├─ python3 -m py_compile skills/*/scripts/*.py
      ├─ bash -n skills/*/scripts/*.sh
      └─ if runnable: actually execute it once against a live service or a --dry-run path
