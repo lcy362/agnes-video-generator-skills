@@ -1,13 +1,30 @@
-# agnes-video
+# agnes-video — free AI video generation, driven by your agent
 
-**One skill that turns an idea into a finished video.** Describe the result you want and your coding
-agent runs the task end to end: it installs the local service, generates the video, reports progress,
-delivers the file, diagnoses failures, and — with your agreement — fixes a genuine defect and opens a PR.
+**One skill that turns an idea into a finished video — free, with no credits or subscription.**
+Describe the result you want and your coding agent runs the task end to end: it installs the local
+service, generates the video, reports progress, delivers the file, diagnoses failures, and — with your
+agreement — fixes a genuine defect and opens a PR.
 
-The service installs on demand under `~/.agnes-video` (override with `AGNES_HOME`) and is reused
-afterwards, so only the first run pays the setup cost.
+Free, and specifically: **no subscription, no credit packs, no per-second billing, no watermark, no
+GPU of your own.** Generation runs on [Agnes AI](https://platform.agnes-ai.com)'s free models, the
+service is MIT-licensed and self-hosted, and the only thing you register for is a free API key. The
+service installs on demand under `~/.agnes-video` (override with `AGNES_HOME`) and is reused
+afterwards, so only the first run pays the setup cost — in minutes and megabytes, not money.
+
+If you are comparing options: Runway, Pika and Sora charge monthly; Kling and Jimeng charge by the
+second once the free quota is gone; running an open-source video model yourself needs a GPU that
+costs more than a year of any of them. This skill is the "none of the above" route — you type an
+idea, an agent drives it, a finished `.mp4` lands on your disk.
 
 ## Quick start
+
+Install it with the skills CLI — one command, no clone:
+
+```bash
+npx skills add lcy362/agnes-video-generator-skills --skill agnes-video
+```
+
+Or manage it with [flint](https://github.com/lcy362/flint), which also tracks and re-deploys it:
 
 ```bash
 git clone https://github.com/lcy362/agnes-video-generator-skills.git
