@@ -14,6 +14,9 @@ output/
 tmp/
 .DS_Store
 
+# Release artifacts built by scripts/build-marketplace-packages.py
+dist/
+
 # Credentials must never be committed (see AGENTS.md §5)
 .env
 .env.*
